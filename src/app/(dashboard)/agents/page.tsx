@@ -19,13 +19,21 @@ const Page = async ({searchParams}: Props) => {
         search: filterSearchParams.search.parseServerSide((await searchParams).search),
         page: filterSearchParams.page.parseServerSide((await searchParams).page),
     }
-    const session = await auth.api.getSession({
-        headers: await headers(),
-      })
+    let session;
     
-      if(!session) {
+    try {
+        session = await auth.api.getSession({
+            headers: await headers(),
+        })
+    } catch (error) {
+        // Session token lookup failed (invalid/expired token)
+        console.error('Session lookup failed:', error);
         redirect('/sign-in')
-      }
+    }
+    
+    if (!session) {
+        redirect('/sign-in')
+    }
     const queryClient = getQueryClient()
     void queryClient.prefetchQuery({ 
       queryKey: ['agents', 'getMany', {}], 
