@@ -4,13 +4,21 @@ import { auth } from "@/lib/auth"
 import { SignUpView } from "@/modules/auth/ui/views/sign-up-view"
 
 const Page = async () => {
-    const session = await auth.api.getSession({
+    let session;
+    
+    try {
+        session = await auth.api.getSession({
             headers: await headers(),
-          })
+        })
+    } catch (error) {
+        // If session query fails (e.g., invalid token), treat as no session
+        console.error('Session query failed:', error);
+        session = null;
+    }
         
-          if(!!session) {
-            redirect('/')
-          }
+    if(!!session) {
+        redirect('/')
+    }
     return <SignUpView />
 }
 

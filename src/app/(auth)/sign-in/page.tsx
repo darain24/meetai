@@ -4,13 +4,21 @@ import {auth} from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 const Page = async () => {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-      })
+    let session;
     
-      if(!!session) {
+    try {
+        session = await auth.api.getSession({
+            headers: await headers(),
+        })
+    } catch (error) {
+        // If session query fails (e.g., invalid token), treat as no session
+        console.error('Session query failed:', error);
+        session = null;
+    }
+    
+    if(!!session) {
         redirect('/')
-      }
+    }
     return <SignInView />
 }
 
