@@ -23,11 +23,21 @@ export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
 export const protectedProcedure = baseProcedure.use(async ({ctx, next}) => {
-  const session = await auth.api.getSession({
-      headers: await headers(),
-    })
-  if(!session){
-    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized'})
+  let session;
+  
+  try {
+      session = await auth.api.getSession({
+          headers: await headers(),
+      })
+  } catch (error) {
+      // Session token lookup failed (invalid/expired token)
+      console.error('Session lookup failed:', error);
+      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Session lookup failed'})
   }
+  
+  if (!session) {
+      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized'})
+  }
+  
   return next({ctx: {...ctx, auth: session}})
 })
