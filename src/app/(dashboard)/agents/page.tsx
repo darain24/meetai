@@ -19,13 +19,21 @@ const Page = async ({searchParams}: Props) => {
         search: filterSearchParams.search.parseServerSide((await searchParams).search),
         page: filterSearchParams.page.parseServerSide((await searchParams).page),
     }
-    const session = await auth.api.getSession({
-        headers: await headers(),
-      })
+    let session;
     
-      if(!session) {
+    try {
+        session = await auth.api.getSession({
+            headers: await headers(),
+        })
+    } catch (error) {
+        // If session query fails (e.g., invalid token), redirect to sign-in
+        console.error('Session query failed:', error);
         redirect('/sign-in')
-      }
+    }
+    
+    if(!session) {
+        redirect('/sign-in')
+    }
     const queryClient = getQueryClient()
     void queryClient.prefetchQuery({ 
       queryKey: ['agents', 'getMany', {}], 
