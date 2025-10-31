@@ -21,7 +21,10 @@ interface Props {
 export const CommandSelect = ({options, onSelect, onSearch, value, placeholder = 'Select an option', className}: Props) => {
     const [open, setOpen] = useState(false)
     const selectOptions = options.find((option) => option.value === value)
-    const [search, setSearch] = useState('')
+    const handleOpenChange = (open: boolean) => {
+        onSearch?.('')
+        setOpen(open)
+    }
 
     return (
         <>
@@ -36,7 +39,7 @@ export const CommandSelect = ({options, onSelect, onSearch, value, placeholder =
                 </div>
                 <ChevronsUpDownIcon />
             </Button>
-            <CommandResponsiveDialog shouldFilter={!onSearch} open={open} onOpenChange={setOpen}>
+            <CommandResponsiveDialog shouldFilter={!onSearch} open={open} onOpenChange={handleOpenChange}>
                 <CommandInput placeholder='Search...' onValueChange={onSearch} />
                 <CommandList>
                     <CommandEmpty>
