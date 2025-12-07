@@ -9,6 +9,20 @@ if (!process.env.GEMINI_API_KEY) {
 // Model names should be without -latest suffix for REST API compatibility
 export const geminiClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
+// Type definitions for model responses
+interface ModelInfo {
+  name?: string
+  supportedGenerationMethods?: string[]
+  supportedMethods?: string[]
+}
+
+interface ModelResponse {
+  models?: ModelInfo[]
+  data?: {
+    models?: ModelInfo[]
+  }
+}
+
 /**
  * Get available models - helper function to list models
  */
@@ -55,15 +69,15 @@ export async function generateGeminiResponse(
   let modelName: string | undefined = undefined
   
   try {
-    const modelsResponse = await geminiClient.listModels()
+    const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
     
     // Handle different response formats
-    const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
+    const modelsList = modelsResponse.models || modelsResponse.data?.models || []
     
     if (modelsList && modelsList.length > 0) {
       // Find models that support generateContent - check various possible method names
       const availableModels = modelsList
-        .filter((m: any) => {
+        .filter((m: ModelInfo) => {
           const methods = m.supportedGenerationMethods || m.supportedMethods || []
           const supportsGenerate = 
             methods.includes('generateContent') || 
@@ -72,7 +86,7 @@ export async function generateGeminiResponse(
             (Array.isArray(methods) && methods.length > 0) // If methods exist, assume it works
           return m.name && supportsGenerate
         })
-        .map((m: any) => {
+        .map((m: ModelInfo) => {
           // Use the exact name from the API response
           const name = m.name || ''
           // Return both with and without "models/" prefix for flexibility
@@ -81,13 +95,13 @@ export async function generateGeminiResponse(
             short: name.replace(/^models\//, '')
           }
         })
-        .filter((m: any) => m.full)
+        .filter((m) => m.full)
       
       if (availableModels.length > 0) {
         // Prefer newer models (1.5 or flash), but use any available
-        const preferred = availableModels.find((m: any) => 
+        const preferred = availableModels.find((m) => 
           m.full.includes('1.5') || m.full.includes('flash') || m.short.includes('1.5') || m.short.includes('flash')
-        ) || availableModels.find((m: any) => 
+        ) || availableModels.find((m) => 
           m.full.includes('pro') || m.short.includes('pro')
         ) || availableModels[0]
         
@@ -133,8 +147,8 @@ export async function generateGeminiResponse(
       // If it's a 404, try to list models and use the first available one
       if ((errorMessage.includes('404') || errorMessage.includes('not found')) && attempt === 0) {
         try {
-          const modelsResponse = await geminiClient.listModels()
-          const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
+          const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
+          const modelsList = modelsResponse.models || modelsResponse.data?.models || []
           
           if (modelsList && modelsList.length > 0) {
             // Try each available model
@@ -236,15 +250,15 @@ export async function generateGeminiChatResponse(
   let modelName: string | undefined = undefined
   
   try {
-    const modelsResponse = await geminiClient.listModels()
+    const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
     
     // Handle different response formats
-    const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
+    const modelsList = modelsResponse.models || modelsResponse.data?.models || []
     
     if (modelsList && modelsList.length > 0) {
       // Find models that support generateContent - check various possible method names
       const availableModels = modelsList
-        .filter((m: any) => {
+        .filter((m: ModelInfo) => {
           const methods = m.supportedGenerationMethods || m.supportedMethods || []
           const supportsGenerate = 
             methods.includes('generateContent') || 
@@ -253,7 +267,7 @@ export async function generateGeminiChatResponse(
             (Array.isArray(methods) && methods.length > 0) // If methods exist, assume it works
           return m.name && supportsGenerate
         })
-        .map((m: any) => {
+        .map((m: ModelInfo) => {
           // Use the exact name from the API response
           const name = m.name || ''
           // Return both with and without "models/" prefix for flexibility
@@ -262,13 +276,13 @@ export async function generateGeminiChatResponse(
             short: name.replace(/^models\//, '')
           }
         })
-        .filter((m: any) => m.full)
+        .filter((m) => m.full)
       
       if (availableModels.length > 0) {
         // Prefer newer models (1.5 or flash), but use any available
-        const preferred = availableModels.find((m: any) => 
+        const preferred = availableModels.find((m) => 
           m.full.includes('1.5') || m.full.includes('flash') || m.short.includes('1.5') || m.short.includes('flash')
-        ) || availableModels.find((m: any) => 
+        ) || availableModels.find((m) => 
           m.full.includes('pro') || m.short.includes('pro')
         ) || availableModels[0]
         
@@ -348,8 +362,8 @@ export async function generateGeminiChatResponse(
       // If it's a 404, try to list models and use the first available one
       if ((errorMessage.includes('404') || errorMessage.includes('not found')) && attempt === 0) {
         try {
-          const modelsResponse = await geminiClient.listModels()
-          const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
+          const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
+          const modelsList = modelsResponse.models || modelsResponse.data?.models || []
           
           if (modelsList && modelsList.length > 0) {
             // Try each available model

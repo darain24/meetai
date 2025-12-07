@@ -117,7 +117,7 @@ export const ChannelInput = ({ onSend, disabled }: Props) => {
 
     if ((hasContent || hasFiles || hasVoice) && !disabled) {
       // If voice note exists, add it to files
-      let filesToSend = [...files]
+      const filesToSend = [...files]
       if (audioBlob && audioUrl) {
         const voiceFile = new File([audioBlob], 'voice-note.webm', { type: 'audio/webm' })
         filesToSend.push({

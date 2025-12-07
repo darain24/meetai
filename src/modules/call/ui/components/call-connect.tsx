@@ -207,10 +207,10 @@ export const CallConnect = ({
                     }
                 }
 
-                const onLoading = (event: any) => {
+                const onLoading = (_event: unknown) => {
                 }
 
-                const onError = (error: any) => {
+                const onError = (error: unknown) => {
                     if (!resolved) {
                         resolved = true
                         clearTimeout(timeout)

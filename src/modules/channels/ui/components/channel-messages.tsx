@@ -45,8 +45,8 @@ export const ChannelMessages = ({ channelId }: Props) => {
     if ((!content.trim() && (!attachments || attachments.length === 0)) || sendMessageMutation.isPending) return
     
     // Convert files to base64
-    let base64Attachments: string[] = []
-    let attachmentTypes: ('image' | 'file' | 'voice')[] = []
+    const base64Attachments: string[] = []
+    const attachmentTypes: ('image' | 'file' | 'voice')[] = []
     
     if (attachments && attachments.length > 0) {
       for (const attachment of attachments) {

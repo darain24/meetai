@@ -170,9 +170,9 @@ export const channelsRouter = createTRPCRouter({
           .innerJoin(user, eq(messages.userId, user.id))
           .where(eq(messages.channelId, input.channelId))
           .orderBy(messages.createdAt);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If columns don't exist yet, query without them
-        const errorMessage = error?.message || ''
+        const errorMessage = error instanceof Error ? error.message : String(error)
         if (errorMessage.includes('attachments') || errorMessage.includes('attachment_types') || errorMessage.includes('does not exist')) {
           channelMessages = await db
             .select({
@@ -209,8 +209,8 @@ export const channelsRouter = createTRPCRouter({
           createdAt: msg.createdAt,
           updatedAt: msg.updatedAt,
           pinned: msg.pinned,
-          attachments: (msg as any).attachments ?? null,
-          attachmentTypes: (msg as any).attachmentTypes ?? null,
+          attachments: 'attachments' in msg ? (msg.attachments as string[] | null) ?? null : null,
+          attachmentTypes: 'attachmentTypes' in msg ? (msg.attachmentTypes as string[] | null) ?? null : null,
           user: msg.user,
         }));
     }),
@@ -275,9 +275,9 @@ export const channelsRouter = createTRPCRouter({
             attachmentTypes: input.attachmentTypes || [],
           })
           .returning();
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If columns don't exist, insert without attachments
-        const errorMessage = error?.message || ''
+        const errorMessage = error instanceof Error ? error.message : String(error)
         if (errorMessage.includes('attachments') || errorMessage.includes('attachment_types') || errorMessage.includes('does not exist')) {
           [createdMessage] = await db
             .insert(messages)
@@ -317,9 +317,9 @@ export const channelsRouter = createTRPCRouter({
           .from(messages)
           .innerJoin(user, eq(messages.userId, user.id))
           .where(eq(messages.id, createdMessage.id));
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If columns don't exist yet, query without them
-        const errorMessage = error?.message || ''
+        const errorMessage = error instanceof Error ? error.message : String(error)
         if (errorMessage.includes('attachments') || errorMessage.includes('attachment_types') || errorMessage.includes('does not exist')) {
           [messageWithUser] = await db
             .select({
@@ -354,8 +354,8 @@ export const channelsRouter = createTRPCRouter({
 
       return {
         ...messageWithUser,
-        attachments: (messageWithUser as any).attachments ?? null,
-        attachmentTypes: (messageWithUser as any).attachmentTypes ?? null,
+        attachments: 'attachments' in messageWithUser ? (messageWithUser.attachments as string[] | null) ?? null : null,
+        attachmentTypes: 'attachmentTypes' in messageWithUser ? (messageWithUser.attachmentTypes as string[] | null) ?? null : null,
         user: messageWithUser.user,
       };
     }),

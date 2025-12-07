@@ -67,7 +67,7 @@ export const HomeView = () => {
           <CardContent>
             <div className="text-2xl font-bold">{totalNotes}</div>
             <p className="text-xs text-muted-foreground">
-              Notes you've created
+              Notes you&apos;ve created
             </p>
           </CardContent>
         </Card>

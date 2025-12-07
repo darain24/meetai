@@ -139,13 +139,14 @@ User ID: ${ctx.auth.user.id}
           code: "INTERNAL_SERVER_ERROR",
           message: "Email service is not configured. Please set up RESEND_API_KEY or SMTP credentials.",
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error instanceof TRPCError) {
           throw error;
         }
+        const errorMessage = error instanceof Error ? error.message : "Unknown error"
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to send email: ${error.message || "Unknown error"}`,
+          message: `Failed to send email: ${errorMessage}`,
         });
       }
     }),

@@ -57,7 +57,7 @@ export const ContactView = () => {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">Contact Us</h1>
-          <p className="text-muted-foreground mt-1">We'd love to hear from you</p>
+          <p className="text-muted-foreground mt-1">We&apos;d love to hear from you</p>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export const ContactView = () => {
             <CardTitle>Send us a message</CardTitle>
           </div>
           <CardDescription>
-            Fill out the form below and we'll get back to you as soon as possible.
+            Fill out the form below and we&apos;ll get back to you as soon as possible.
           </CardDescription>
         </CardHeader>
         <CardContent>
