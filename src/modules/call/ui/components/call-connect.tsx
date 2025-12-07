@@ -56,11 +56,16 @@ export const CallConnect = ({
         // Check if there's already an existing instance
         const existingInstance = Daily.getCallInstance()
         if (existingInstance && !existingInstance.isDestroyed()) {
-            // Reuse existing instance if it's a frame
-            if (existingInstance.iframe) {
-                callObjectRef.current = existingInstance
-                setCallObject(existingInstance)
-                return
+            // Reuse existing instance if it's a frame (iframe is a method that returns the iframe element)
+            try {
+                const iframeElement = existingInstance.iframe?.()
+                if (iframeElement) {
+                    callObjectRef.current = existingInstance
+                    setCallObject(existingInstance)
+                    return
+                }
+            } catch {
+                // If iframe() doesn't exist or throws, continue to create new instance
             }
         }
         
