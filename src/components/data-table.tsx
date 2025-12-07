@@ -15,6 +15,13 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
+// Extend ColumnMeta to include align property
+declare module "@tanstack/react-table" {
+  interface ColumnMeta<TData, TValue> {
+    align?: "left" | "right" | "center"
+  }
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[],
