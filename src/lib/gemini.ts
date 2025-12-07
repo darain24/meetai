@@ -9,33 +9,6 @@ if (!process.env.GEMINI_API_KEY) {
 // Model names should be without -latest suffix for REST API compatibility
 export const geminiClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
-// Type definitions for model responses
-interface ModelInfo {
-  name?: string
-  supportedGenerationMethods?: string[]
-  supportedMethods?: string[]
-}
-
-interface ModelResponse {
-  models?: ModelInfo[]
-  data?: {
-    models?: ModelInfo[]
-  }
-}
-
-/**
- * Get available models - helper function to list models
- */
-export async function listAvailableModels() {
-  try {
-    const models = await geminiClient.listModels()
-    return models
-  } catch (error) {
-    console.error("Error listing models:", error)
-    return null
-  }
-}
-
 /**
  * Sleep for a given number of milliseconds
  */
@@ -65,65 +38,13 @@ export async function generateGeminiResponse(
   userInput: string,
   instructions: string
 ): Promise<string> {
-  // Try to get available models first, then use the first available one
-  let modelName: string | undefined = undefined
-  
-  try {
-    const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
-    
-    // Handle different response formats
-    const modelsList = modelsResponse.models || modelsResponse.data?.models || []
-    
-    if (modelsList && modelsList.length > 0) {
-      // Find models that support generateContent - check various possible method names
-      const availableModels = modelsList
-        .filter((m: ModelInfo) => {
-          const methods = m.supportedGenerationMethods || m.supportedMethods || []
-          const supportsGenerate = 
-            methods.includes('generateContent') || 
-            methods.includes('GENERATE_CONTENT') ||
-            methods.includes('generate-content') ||
-            (Array.isArray(methods) && methods.length > 0) // If methods exist, assume it works
-          return m.name && supportsGenerate
-        })
-        .map((m: ModelInfo) => {
-          // Use the exact name from the API response
-          const name = m.name || ''
-          // Return both with and without "models/" prefix for flexibility
-          return {
-            full: name,
-            short: name.replace(/^models\//, '')
-          }
-        })
-        .filter((m) => m.full)
-      
-      if (availableModels.length > 0) {
-        // Prefer newer models (1.5 or flash), but use any available
-        const preferred = availableModels.find((m) => 
-          m.full.includes('1.5') || m.full.includes('flash') || m.short.includes('1.5') || m.short.includes('flash')
-        ) || availableModels.find((m) => 
-          m.full.includes('pro') || m.short.includes('pro')
-        ) || availableModels[0]
-        
-        // Try the short name first, then the full name
-        modelName = preferred.short || preferred.full
-      }
-    }
-  } catch (error) {
-    console.error("Error listing models (generateGeminiResponse):", error)
-    // Continue without setting modelName, will use fallback
-  }
-  
-  // Fallback to common model names if listing failed
-  if (!modelName) {
-    // Use correct model names for REST API (without -latest suffix)
-    const fallbackModels = [
-      "gemini-1.5-flash",
-      "gemini-1.5-pro", 
-      "gemini-pro"
-    ]
-    modelName = fallbackModels[0] // Start with first fallback
-  }
+  // Use fallback model names (listModels is not available in the SDK)
+  const fallbackModels = [
+    "gemini-1.5-flash",
+    "gemini-1.5-pro", 
+    "gemini-pro"
+  ]
+  const modelName = fallbackModels[0]
 
     const model = geminiClient.getGenerativeModel({ 
     model: modelName,
@@ -144,47 +65,16 @@ export async function generateGeminiResponse(
       lastError = error
       const errorMessage = error instanceof Error ? error.message : String(error)
       
-      // If it's a 404, try to list models and use the first available one
+      // If it's a 404, try alternative models
       if ((errorMessage.includes('404') || errorMessage.includes('not found')) && attempt === 0) {
-        try {
-          const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
-          const modelsList = modelsResponse.models || modelsResponse.data?.models || []
-          
-          if (modelsList && modelsList.length > 0) {
-            // Try each available model
-            for (const modelInfo of modelsList) {
-              const modelFullName = modelInfo.name || ''
-              const modelShortName = modelFullName.replace(/^models\//, '')
-              
-              // Try both full name and short name
-              for (const tryName of [modelShortName, modelFullName]) {
-                if (tryName && tryName !== modelName) {
-                  try {
-                    const altModelInstance = geminiClient.getGenerativeModel({ model: tryName })
-                    const result = await altModelInstance.generateContent(prompt)
-                    const response = result.response
-                    const text = response.text()
-                    if (text && text.trim()) {
-                      return text
-                    }
-                  } catch (altError) {
-                    // Continue to next model
-                    continue
-                  }
-                }
-              }
-            }
-          }
-        } catch (listError) {
-          console.error("Error listing models during 404 recovery:", listError)
-        }
-        
-        // If listModels didn't help, try hardcoded alternatives
+        // Try hardcoded alternatives
         const alternativeModels = [
           "gemini-1.5-flash",
           "gemini-1.5-pro",
+          "gemini-pro",
           "models/gemini-1.5-flash",
-          "models/gemini-1.5-pro"
+          "models/gemini-1.5-pro",
+          "models/gemini-pro"
         ]
         for (const altModel of alternativeModels) {
           if (altModel !== modelName) {
@@ -196,7 +86,7 @@ export async function generateGeminiResponse(
               if (text && text.trim()) {
                 return text
               }
-            } catch (altError) {
+            } catch {
               // Continue to next alternative
               continue
             }
@@ -246,65 +136,13 @@ export async function generateGeminiChatResponse(
     throw new Error("Last message must be from user")
   }
 
-  // Try to get available models first, then use the first available one
-  let modelName: string | undefined = undefined
-  
-  try {
-    const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
-    
-    // Handle different response formats
-    const modelsList = modelsResponse.models || modelsResponse.data?.models || []
-    
-    if (modelsList && modelsList.length > 0) {
-      // Find models that support generateContent - check various possible method names
-      const availableModels = modelsList
-        .filter((m: ModelInfo) => {
-          const methods = m.supportedGenerationMethods || m.supportedMethods || []
-          const supportsGenerate = 
-            methods.includes('generateContent') || 
-            methods.includes('GENERATE_CONTENT') ||
-            methods.includes('generate-content') ||
-            (Array.isArray(methods) && methods.length > 0) // If methods exist, assume it works
-          return m.name && supportsGenerate
-        })
-        .map((m: ModelInfo) => {
-          // Use the exact name from the API response
-          const name = m.name || ''
-          // Return both with and without "models/" prefix for flexibility
-          return {
-            full: name,
-            short: name.replace(/^models\//, '')
-          }
-        })
-        .filter((m) => m.full)
-      
-      if (availableModels.length > 0) {
-        // Prefer newer models (1.5 or flash), but use any available
-        const preferred = availableModels.find((m) => 
-          m.full.includes('1.5') || m.full.includes('flash') || m.short.includes('1.5') || m.short.includes('flash')
-        ) || availableModels.find((m) => 
-          m.full.includes('pro') || m.short.includes('pro')
-        ) || availableModels[0]
-        
-        // Try the short name first, then the full name
-        modelName = preferred.short || preferred.full
-      }
-    }
-  } catch (error) {
-    console.error("Error listing models (generateGeminiChatResponse):", error)
-    // Continue without setting modelName, will use fallback
-  }
-  
-  // Fallback to common model names if listing failed
-  if (!modelName) {
-    // Use correct model names for REST API (without -latest suffix)
-    const fallbackModels = [
-      "gemini-1.5-flash",
-      "gemini-1.5-pro", 
-      "gemini-pro"
-    ]
-    modelName = fallbackModels[0] // Start with first fallback
-  }
+  // Use fallback model names (listModels is not available in the SDK)
+  const fallbackModels = [
+    "gemini-1.5-flash",
+    "gemini-1.5-pro", 
+    "gemini-pro"
+  ]
+  const modelName = fallbackModels[0]
 
     const model = geminiClient.getGenerativeModel({ 
     model: modelName,
@@ -359,68 +197,9 @@ export async function generateGeminiChatResponse(
       lastError = error
       const errorMessage = error instanceof Error ? error.message : String(error)
       
-      // If it's a 404, try to list models and use the first available one
+      // If it's a 404, try alternative models
       if ((errorMessage.includes('404') || errorMessage.includes('not found')) && attempt === 0) {
-        try {
-          const modelsResponse = await geminiClient.listModels() as unknown as ModelResponse
-          const modelsList = modelsResponse.models || modelsResponse.data?.models || []
-          
-          if (modelsList && modelsList.length > 0) {
-            // Try each available model
-            for (const modelInfo of modelsList) {
-              const modelFullName = modelInfo.name || ''
-              const modelShortName = modelFullName.replace(/^models\//, '')
-              
-              // Try both full name and short name
-              for (const tryName of [modelShortName, modelFullName]) {
-                if (tryName && tryName !== modelName) {
-                  try {
-                    const altModelInstance = geminiClient.getGenerativeModel({ model: tryName })
-                    
-                    // Rebuild chat with alternative model
-                    const history = messages.slice(0, -1).map(msg => ({
-                      role: msg.role === "user" ? "user" : "model",
-                      parts: [{ text: msg.content }],
-                    }))
-                    
-                    const altChat = altModelInstance.startChat({
-                      history: [
-                        {
-                          role: "user",
-                          parts: [{ text: instructions }],
-                        },
-                        {
-                          role: "model",
-                          parts: [{ text: "Understood. I am ready to assist." }],
-                        },
-                        ...history,
-                      ],
-                      generationConfig: {
-                        maxOutputTokens: 2000,
-                        temperature: 0.7,
-                      },
-                    })
-                    
-                    const result = await altChat.sendMessage(lastMessage.content)
-                    const response = result.response
-                    const text = response.text()
-                    
-                    if (text && text.trim().length > 0) {
-                      return text
-                    }
-                  } catch (altError) {
-                    // Continue to next model
-                    continue
-                  }
-                }
-              }
-            }
-          }
-        } catch (listError) {
-          console.error("Error listing models during 404 recovery:", listError)
-        }
-        
-        // If listModels didn't help, try hardcoded alternatives (correct REST API names)
+        // Try hardcoded alternatives
         const alternativeModels = [
           "gemini-1.5-flash",
           "gemini-1.5-pro",
@@ -465,7 +244,7 @@ export async function generateGeminiChatResponse(
               if (text && text.trim().length > 0) {
                 return text
               }
-            } catch (altError) {
+            } catch {
               // Continue to next alternative
               continue
             }
