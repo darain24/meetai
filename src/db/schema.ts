@@ -61,10 +61,44 @@ export const verification = pgTable("verification", {
     .notNull(),
 });
 
-// Legacy tables removed:
-// - agents (no longer needed, AI functionality removed)
-// - meetings (no longer needed, replaced by channels)
-// - meetingStatus enum (no longer needed)
+// Meeting status enum
+export const meetingStatus = pgEnum('meeting_status', ['upcoming', 'active', 'completed', 'cancelled', 'processing']);
+
+// Agents table
+export const agents = pgTable('agents', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  name: text('name').notNull(),
+  instructions: text('instructions').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow().$defaultFn(() => new Date()),
+});
+
+// Meetings table
+export const meetings = pgTable('meetings', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  name: text('name').notNull(),
+  agentId: text('agent_id')
+    .notNull()
+    .references(() => agents.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  status: meetingStatus('status').default('upcoming').notNull(),
+  startedAt: timestamp('started_at'),
+  endedAt: timestamp('ended_at'),
+  transcriptUrl: text('transcript_url'),
+  recordingUrl: text('recording_url'),
+  summary: text('summary'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow().$defaultFn(() => new Date()),
+});
 
 // Channels for team collaboration
 export const channels = pgTable('channels', {
@@ -90,7 +124,7 @@ export const channelMembers = pgTable('channel_members', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
-// Messages in channels
+// Messages in channels or meetings
 export const messages = pgTable('messages', {
   id: text('id')
     .primaryKey()
@@ -98,9 +132,12 @@ export const messages = pgTable('messages', {
   content: text('content').notNull(),
   channelId: text('channel_id')
     .references(() => channels.id, { onDelete: 'cascade' }),
+  meetingId: text('meeting_id')
+    .references(() => meetings.id, { onDelete: 'cascade' }),
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
+  role: text('role').default('user'), // 'user' or 'assistant' for meeting messages
   // File attachments (nullable for migration compatibility)
   attachments: text('attachments').array(), // Array of file URLs or base64 - nullable until migration
   attachmentTypes: text('attachment_types').array(), // 'image', 'file', 'voice' - nullable until migration
