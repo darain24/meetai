@@ -74,7 +74,6 @@ export const AgentJoiner = ({ meetingId, roomUrl }: Props) => {
                 await agentCall.setLocalVideo(false)
                 await agentCall.setLocalAudio(true)
 
-                console.log(`Agent ${agentId} joined the call ${meetingId}`)
                 hasJoinedRef.current = true
                 
                 // Clear the polling interval

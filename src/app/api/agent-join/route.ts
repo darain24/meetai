@@ -83,7 +83,6 @@ export async function POST(req: NextRequest) {
       timestamp: Date.now(),
     })
 
-    console.log(`[AGENT-JOIN API] Agent join request stored for meeting ${meetingId}`)
 
     return NextResponse.json({
       success: true,

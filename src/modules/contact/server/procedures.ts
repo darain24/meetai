@@ -77,7 +77,6 @@ User ID: ${ctx.auth.user.id}
 
             return { success: true, messageId: data?.id };
           } catch (importError) {
-            console.error("Failed to import or use Resend:", importError);
             // Fall through to other methods
           }
         }
@@ -127,14 +126,12 @@ User ID: ${ctx.auth.user.id}
         }
 
         // If no email service is configured, log the message (for development)
-        console.log("Contact form submission (email not configured):", {
-          to: recipientEmail,
-          subject: emailSubject,
-          body: emailBody,
-        });
-
-        // In development, return success even without email service
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Contact form submission (email not configured):", {
+            to: recipientEmail,
+            subject: emailSubject,
+            body: emailBody,
+          });
           return { success: true, messageId: "dev-mode" };
         }
 

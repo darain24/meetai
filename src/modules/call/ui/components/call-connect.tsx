@@ -83,7 +83,6 @@ export const CallConnect = ({
             })
             callObjectRef.current = frame
             setCallObject(frame)
-            console.log('Daily.co frame created with URL and token')
         } catch (error) {
             console.error('Failed to create Daily frame:', error)
         }
@@ -113,13 +112,11 @@ export const CallConnect = ({
             throw new Error(`Cannot join: missing ${missing.join(', ')}`)
         }
 
-        console.log('Joining Daily.co call...', { roomUrl, meetingId })
         
         try {
             // Check if already joined (frame might have auto-joined)
             const participants = callObject.participants()
             if (participants?.local) {
-                console.log('Already joined to Daily.co call')
                 // Still trigger agent join
                 try {
                     await fetch('/api/agent-join', {
@@ -142,7 +139,6 @@ export const CallConnect = ({
             // Check again after waiting
             const participantsAfterWait = callObject.participants()
             if (participantsAfterWait?.local) {
-                console.log('Frame auto-joined to Daily.co call')
                 // Still trigger agent join
                 try {
                     await fetch('/api/agent-join', {
@@ -177,7 +173,6 @@ export const CallConnect = ({
                         cleanup()
                         // Final check - if we have local participant, we're joined
                         if (callObject?.participants()?.local) {
-                            console.log('Successfully joined Daily.co call (timeout check)')
                             resolve()
                         } else {
                             reject(new Error('Join timeout: The call took too long to connect'))
@@ -198,7 +193,6 @@ export const CallConnect = ({
                         clearTimeout(timeout)
                         clearInterval(pollInterval)
                         cleanup()
-                        console.log('Successfully joined Daily.co call (detected via polling)')
                         resolve()
                     }
                 }, 200) // Check every 200ms
@@ -209,13 +203,11 @@ export const CallConnect = ({
                         clearTimeout(timeout)
                         clearInterval(pollInterval)
                         cleanup()
-                        console.log('Successfully joined Daily.co call (event)')
                         resolve()
                     }
                 }
 
                 const onLoading = (event: any) => {
-                    console.log('Daily.co loading state:', event)
                 }
 
                 const onError = (error: any) => {
@@ -273,7 +265,6 @@ export const CallConnect = ({
                     const errorData = await response.json().catch(() => ({}))
                     console.warn('Agent join request failed:', errorData)
                 } else {
-                    console.log('Agent join request sent')
                 }
             } catch (error) {
                 // Don't throw - agent join failure shouldn't block user join

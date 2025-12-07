@@ -56,7 +56,6 @@ export async function generateGeminiResponse(
   
   try {
     const modelsResponse = await geminiClient.listModels()
-    console.log("Full models response (generateGeminiResponse):", JSON.stringify(modelsResponse, null, 2))
     
     // Handle different response formats
     const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
@@ -84,8 +83,6 @@ export async function generateGeminiResponse(
         })
         .filter((m: any) => m.full)
       
-      console.log("Filtered available models (generateGeminiResponse):", availableModels)
-      
       if (availableModels.length > 0) {
         // Prefer newer models (1.5 or flash), but use any available
         const preferred = availableModels.find((m: any) => 
@@ -96,14 +93,10 @@ export async function generateGeminiResponse(
         
         // Try the short name first, then the full name
         modelName = preferred.short || preferred.full
-        console.log(`Selected model (generateGeminiResponse): ${modelName} (from ${preferred.full})`)
       }
     }
   } catch (error) {
     console.error("Error listing models (generateGeminiResponse):", error)
-    if (error instanceof Error) {
-      console.error("Error details:", error.message, error.stack)
-    }
     // Continue without setting modelName, will use fallback
   }
   
@@ -116,7 +109,6 @@ export async function generateGeminiResponse(
       "gemini-pro"
     ]
     modelName = fallbackModels[0] // Start with first fallback
-    console.log(`Using fallback model (generateGeminiResponse): ${modelName}`)
   }
 
     const model = geminiClient.getGenerativeModel({ 
@@ -141,13 +133,10 @@ export async function generateGeminiResponse(
       // If it's a 404, try to list models and use the first available one
       if ((errorMessage.includes('404') || errorMessage.includes('not found')) && attempt === 0) {
         try {
-          console.log("404 error detected, attempting to discover available models...")
           const modelsResponse = await geminiClient.listModels()
           const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
           
           if (modelsList && modelsList.length > 0) {
-            console.log("Found models from listModels:", modelsList.map((m: any) => m.name))
-            
             // Try each available model
             for (const modelInfo of modelsList) {
               const modelFullName = modelInfo.name || ''
@@ -157,13 +146,11 @@ export async function generateGeminiResponse(
               for (const tryName of [modelShortName, modelFullName]) {
                 if (tryName && tryName !== modelName) {
                   try {
-                    console.log(`Trying discovered model: ${tryName}`)
                     const altModelInstance = geminiClient.getGenerativeModel({ model: tryName })
                     const result = await altModelInstance.generateContent(prompt)
                     const response = result.response
                     const text = response.text()
                     if (text && text.trim()) {
-                      console.log(`Success with model: ${tryName}`)
                       return text
                     }
                   } catch (altError) {
@@ -188,13 +175,11 @@ export async function generateGeminiResponse(
         for (const altModel of alternativeModels) {
           if (altModel !== modelName) {
             try {
-              console.log(`Trying hardcoded alternative model: ${altModel}`)
               const altModelInstance = geminiClient.getGenerativeModel({ model: altModel })
               const result = await altModelInstance.generateContent(prompt)
               const response = result.response
               const text = response.text()
               if (text && text.trim()) {
-                console.log(`Success with model: ${altModel}`)
                 return text
               }
             } catch (altError) {
@@ -210,7 +195,6 @@ export async function generateGeminiResponse(
         const retryDelay = extractRetryDelay(errorMessage) || (attempt + 1) * 2000 // Exponential backoff
         
         if (attempt < maxRetries - 1) {
-          console.warn(`Rate limit hit, retrying in ${retryDelay}ms (attempt ${attempt + 1}/${maxRetries})`)
           await sleep(retryDelay)
           continue
         }
@@ -253,7 +237,6 @@ export async function generateGeminiChatResponse(
   
   try {
     const modelsResponse = await geminiClient.listModels()
-    console.log("Full models response (generateGeminiChatResponse):", JSON.stringify(modelsResponse, null, 2))
     
     // Handle different response formats
     const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
@@ -281,8 +264,6 @@ export async function generateGeminiChatResponse(
         })
         .filter((m: any) => m.full)
       
-      console.log("Filtered available models (generateGeminiChatResponse):", availableModels)
-      
       if (availableModels.length > 0) {
         // Prefer newer models (1.5 or flash), but use any available
         const preferred = availableModels.find((m: any) => 
@@ -293,14 +274,10 @@ export async function generateGeminiChatResponse(
         
         // Try the short name first, then the full name
         modelName = preferred.short || preferred.full
-        console.log(`Selected model (generateGeminiChatResponse): ${modelName} (from ${preferred.full})`)
       }
     }
   } catch (error) {
     console.error("Error listing models (generateGeminiChatResponse):", error)
-    if (error instanceof Error) {
-      console.error("Error details:", error.message, error.stack)
-    }
     // Continue without setting modelName, will use fallback
   }
   
@@ -313,7 +290,6 @@ export async function generateGeminiChatResponse(
       "gemini-pro"
     ]
     modelName = fallbackModels[0] // Start with first fallback
-    console.log(`Using fallback model (generateGeminiChatResponse): ${modelName}`)
   }
 
     const model = geminiClient.getGenerativeModel({ 
@@ -372,13 +348,10 @@ export async function generateGeminiChatResponse(
       // If it's a 404, try to list models and use the first available one
       if ((errorMessage.includes('404') || errorMessage.includes('not found')) && attempt === 0) {
         try {
-          console.log("404 error detected, attempting to discover available models...")
           const modelsResponse = await geminiClient.listModels()
           const modelsList = modelsResponse.models || (modelsResponse as any)?.data?.models || []
           
           if (modelsList && modelsList.length > 0) {
-            console.log("Found models from listModels:", modelsList.map((m: any) => m.name))
-            
             // Try each available model
             for (const modelInfo of modelsList) {
               const modelFullName = modelInfo.name || ''
@@ -388,7 +361,6 @@ export async function generateGeminiChatResponse(
               for (const tryName of [modelShortName, modelFullName]) {
                 if (tryName && tryName !== modelName) {
                   try {
-                    console.log(`Trying discovered model: ${tryName}`)
                     const altModelInstance = geminiClient.getGenerativeModel({ model: tryName })
                     
                     // Rebuild chat with alternative model
@@ -420,7 +392,6 @@ export async function generateGeminiChatResponse(
                     const text = response.text()
                     
                     if (text && text.trim().length > 0) {
-                      console.log(`Success with model: ${tryName}`)
                       return text
                     }
                   } catch (altError) {
@@ -447,7 +418,6 @@ export async function generateGeminiChatResponse(
         for (const altModel of alternativeModels) {
           if (altModel !== modelName) {
             try {
-              console.log(`Trying hardcoded alternative model: ${altModel}`)
               const altModelInstance = geminiClient.getGenerativeModel({ model: altModel })
               
               // Rebuild chat with alternative model
@@ -479,7 +449,6 @@ export async function generateGeminiChatResponse(
               const text = response.text()
               
               if (text && text.trim().length > 0) {
-                console.log(`Success with model: ${altModel}`)
                 return text
               }
             } catch (altError) {
@@ -495,7 +464,6 @@ export async function generateGeminiChatResponse(
         const retryDelay = extractRetryDelay(errorMessage) || (attempt + 1) * 2000 // Exponential backoff
         
         if (attempt < maxRetries - 1) {
-          console.warn(`Rate limit hit, retrying in ${retryDelay}ms (attempt ${attempt + 1}/${maxRetries})`)
           await sleep(retryDelay)
           continue
         }
@@ -503,10 +471,6 @@ export async function generateGeminiChatResponse(
       
       // If not a rate limit error or max retries reached, log and throw
     console.error("Error generating Gemini chat response:", error)
-      if (error instanceof Error) {
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-      }
       
       // If it's the last attempt or not a rate limit error, throw immediately
       if (attempt === maxRetries - 1 || !errorMessage.includes('429')) {

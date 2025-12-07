@@ -1,6 +1,5 @@
 import { db } from "@/db";
-// Legacy imports - these tables are being removed
-// import { agents, meetings, messages } from "@/db/schema";
+import { agents, meetings, messages } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { meetingsInsertSchema, meetingsUpdateSchema } from "../schemas";
 import z from "zod";
@@ -8,8 +7,7 @@ import { and, desc, eq, getTableColumns, ilike, count, sql } from "drizzle-orm";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/constants";
 import { TRPCError } from "@trpc/server";
 import { MeetingStatus } from "../types";
-import { generateAvatarUri } from "@/lib/avatar";
-// AI functionality removed - this router is legacy
+import { dailyVideo } from "@/lib/daily-video";
 
 export const meetingsRouter = createTRPCRouter({
   generateToken: protectedProcedure
