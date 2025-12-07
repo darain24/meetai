@@ -13,6 +13,7 @@ import {
   TableCell,          
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -45,7 +46,13 @@ export function DataTable<TData, TValue>({
                 className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="text-sm p-4">
+                  <TableCell 
+                    key={cell.id} 
+                    className={cn(
+                      "text-sm p-4",
+                      cell.column.columnDef.meta?.align === "right" && "text-right"
+                    )}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

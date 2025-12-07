@@ -75,7 +75,7 @@ export const MeetingIdView = ({meetingId}: Props) => {
 
 export const MeetingIdViewLoading = () => {
     return (
-        <LoadingState title="Loading Meeting" description="This may take a few seconds"/>
+        <LoadingState title="Loading chat" description="This may take a few seconds"/>
     )
 }
 

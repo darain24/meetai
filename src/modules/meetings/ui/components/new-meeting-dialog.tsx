@@ -13,8 +13,8 @@ export const NewMeetingDialog = ({
     const router = useRouter();
     return (
         <ResponsiveDialog 
-            title="New Meeting"
-            description="Create a new meeting"
+            title="New Chat"
+            description="Create a new chat"
             open= {open}
             onOpenChange={onOpenChange}
         >

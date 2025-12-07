@@ -1,56 +1,16 @@
-import { LogInIcon } from "lucide-react"
-import {
-    DefaultVideoPlaceholder,
-    StreamVideoParticipant,
-    ToggleAudioPreviewButton,
-    ToggleVideoPreviewButton,
-    useCallStateHooks,
-    VideoPreview,
-} from '@stream-io/video-react-sdk'
+import { LogInIcon, LoaderIcon } from "lucide-react"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import {Button} from '@/components/ui/button'
-import {generateAvatarUri} from '@/lib/avatar'
-import "@stream-io/video-react-sdk/dist/css/styles.css"
-
 
 interface Props {
     onJoin: () => void
+    isJoining?: boolean
+    joinError?: string | null
 }
 
-const DisabledVideoPreview = () => {
+export const CallLobby = ({onJoin, isJoining = false, joinError}: Props) => {
     const {data} = authClient.useSession()
-
-    return (
-        <DefaultVideoPlaceholder 
-            participant={
-                {
-                    name: data?.user.name ?? "",
-                    image:
-                        data?.user.image ?? 
-                        generateAvatarUri({
-                            seed: data?.user.name ?? "",
-                            variant: "initials"
-                        })
-                } as StreamVideoParticipant
-            }
-        />
-    )
-}
-
-const AllowBrowserPermissions = () => {
-    return (
-        <p className="text-sm">
-            Please grant your browser a permission to access your camera and microphone.
-        </p>
-    )
-}
-export const CallLobby = ({onJoin}: Props) => {
-    const {useCameraState, useMicrophoneState} = useCallStateHooks()
-    const {hasBrowserPermission : hasMicrophonePermission} = useMicrophoneState()
-    const {hasBrowserPermission : hasCameraPermission} = useCameraState()
-
-    const hasBrowserMediaPermissions = hasMicrophonePermission && hasCameraPermission
 
     return (
         <div className="flex flex-col items-center justify-center h-full bg-radial from-sidebar-accent to-sidebar">
@@ -60,26 +20,29 @@ export const CallLobby = ({onJoin}: Props) => {
                         <h6 className="text-lg font-medium">Ready to join?</h6>
                         <p className="text-sm">Set up your call before joining</p>
                     </div>
-                    <VideoPreview
-                        DisabledVideoPreview={
-                            hasBrowserMediaPermissions 
-                                ? DisabledVideoPreview
-                                : AllowBrowserPermissions 
-                        } 
-                    />
-                    <div className="flex gap-x-2">
-                        <ToggleAudioPreviewButton />
-                        <ToggleVideoPreviewButton />
+                    {joinError && (
+                        <div className="text-sm text-red-500 bg-red-50 p-2 rounded">
+                            {joinError}
                     </div>
+                    )}
                     <div className="flex gap-x-2 justify-between w-full">
-                        <Button asChild variant = 'ghost'>
+                        <Button asChild variant = 'ghost' disabled={isJoining}>
                             <Link href="/meetings">
                             Cancel
                             </Link>
                         </Button>
-                        <Button onClick={onJoin}>
+                        <Button onClick={onJoin} disabled={isJoining}>
+                            {isJoining ? (
+                                <>
+                                    <LoaderIcon className="size-4 animate-spin" />
+                                    Joining...
+                                </>
+                            ) : (
+                                <>
                             <LogInIcon />
                             Join Call
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>

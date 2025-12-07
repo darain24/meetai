@@ -34,7 +34,7 @@ export const MeetingsView = () => {
 export const MeetingsViewLoading = () => {
     return (
       <LoadingState
-        title="Loading Meetings"
+        title="Loading chats"
         description="This may take a few seconds"
       />
     );

@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import {nanoid} from 'nanoid'
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -60,46 +61,66 @@ export const verification = pgTable("verification", {
     .notNull(),
 });
 
-export const agents = pgTable('agents', {
+// Legacy tables removed:
+// - agents (no longer needed, AI functionality removed)
+// - meetings (no longer needed, replaced by channels)
+// - meetingStatus enum (no longer needed)
+
+// Channels for team collaboration
+export const channels = pgTable('channels', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => nanoid()),
   name: text('name').notNull(),
-  userId : text('uset_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  instructions: text('instructions').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-
 })
 
-export const meetingStatus =  pgEnum('meeting_status', [
-  'upcoming',
-  'active',
-  'completed',
-  'cancelled',
-  'processing'
-])
-
-export const meetings = pgTable('meetings', {
+// Channel members (many-to-many relationship)
+export const channelMembers = pgTable('channel_members', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => nanoid()),
-  name: text('name').notNull(),
-  userId : text('user_id')
+  channelId: text('channel_id')
+    .notNull()
+    .references(() => channels.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-  agentId : text('agent_id')
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+// Messages in channels
+export const messages = pgTable('messages', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  content: text('content').notNull(),
+  channelId: text('channel_id')
+    .references(() => channels.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
     .notNull()
-    .references(() => agents.id, { onDelete: 'cascade' }),
-  status: meetingStatus('status').notNull().default('upcoming'),
-  startedAt: timestamp('started_at'),
-  endedAt: timestamp('ended_at'),
-  transcriptUrl: text('transcript_url'),
-  recordingUrl: text('recording_url'),
-  summary: text('summary'),
+    .references(() => user.id, { onDelete: 'cascade' }),
+  // File attachments (nullable for migration compatibility)
+  attachments: text('attachments').array(), // Array of file URLs or base64 - nullable until migration
+  attachmentTypes: text('attachment_types').array(), // 'image', 'file', 'voice' - nullable until migration
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow().$defaultFn(() => new Date()),
+  pinned: boolean('pinned').default(false).notNull(),
+})
+
+// Personal notes
+export const notes = pgTable('notes', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  tags: text('tags').array().notNull().$defaultFn(() => []), // Array of strings
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  pinned: boolean('pinned').default(false).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-
 })

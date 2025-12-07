@@ -2,13 +2,11 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MeetingGetMany } from "../../types";
-import { GeneratedAvatar } from "@/components/generated-avatar";
 import { 
   CircleCheckIcon,
   CircleXIcon,
   ClockArrowUpIcon,
   ClockFadingIcon,
-  CornerDownRightIcon,
   LoaderIcon,
   VideoIcon
  } from "lucide-react";
@@ -49,18 +47,6 @@ export const columns: ColumnDef<MeetingGetMany[number]>[] = [
     cell: ({ row }) => (
       <div className="flex flex-col gap-y-1">
         <span className="font-semibold capitalize">{row.original.name}</span>
-        <div className="flex items-center gap-x-2">
-          <div className="flex items-center gap-x-1"></div>
-            <CornerDownRightIcon className="size-3 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground max-w-[200px] truncate">
-              {row.original.agent.name}
-            </span>
-        </div>
-        <GeneratedAvatar 
-          seed={row.original.agent.name}
-          variant="botttsNeutral"
-          className="size-4"
-        />
         <span className="text-sm text-muted-foreground">
           {row.original.startedAt ? format(row.original.startedAt, 'MMM d') : ''}
         </span>
@@ -88,14 +74,17 @@ export const columns: ColumnDef<MeetingGetMany[number]>[] = [
   {
     accessorKey: "duration",
     header: "Duration",
-    cell: ({row}) => (
-      <Badge 
-        variant="outline"
-        className="capitalize flex items-center gap-x-2 [&>svg]:size-4"
-      >
-        <ClockFadingIcon className='text-blue-700'/>
-        {row.original.duration ? formatDuration(row.original.duration) : 'No duration'}
-      </Badge>
-    ),
+    cell: ({row}) => {
+      if (!row.original.duration) return null;
+      return (
+        <Badge 
+          variant="outline"
+          className="capitalize flex items-center gap-x-2 [&>svg]:size-4"
+        >
+          <ClockFadingIcon className='text-blue-700'/>
+          {formatDuration(row.original.duration)}
+        </Badge>
+      );
+    },
   }
 ];
