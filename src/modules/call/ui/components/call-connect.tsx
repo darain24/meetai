@@ -58,7 +58,7 @@ export const CallConnect = ({
         if (existingInstance && !existingInstance.isDestroyed()) {
             // Reuse existing instance if it's a frame (iframe is a method that returns the iframe element)
             try {
-                const iframeElement = existingInstance.iframe?.()
+                const iframeElement = typeof existingInstance.iframe === 'function' ? existingInstance.iframe() : null
                 if (iframeElement) {
                     callObjectRef.current = existingInstance
                     setCallObject(existingInstance)
