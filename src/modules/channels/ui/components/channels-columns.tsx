@@ -79,3 +79,6 @@ export const channelsColumns: ColumnDef<Channel>[] = [
   },
 ]
 
+// Re-export Channel type for consumers
+export type { Channel }
+
