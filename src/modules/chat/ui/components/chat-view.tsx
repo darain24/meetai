@@ -38,7 +38,13 @@ export const ChatView = ({ meetingId, meetingName, agentName }: Props) => {
 
   useEffect(() => {
     if (initialMessages) {
-      setMessages(initialMessages)
+      const normalized = initialMessages.map((msg) => ({
+        id: msg.id,
+        role: msg.role === "assistant" ? "assistant" : "user",
+        content: msg.content,
+        createdAt: new Date(msg.createdAt),
+      }))
+      setMessages(normalized)
       // Scroll to bottom on initial load
       setTimeout(() => {
         scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
