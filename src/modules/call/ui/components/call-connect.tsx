@@ -79,7 +79,6 @@ export const CallConnect = ({
                 showLocalVideo: true,
                 showParticipantsBar: true,
                 userName: userName,
-                userImage: userImage,
                 iframeStyle: {
                     width: '100%',
                     height: '100%',
