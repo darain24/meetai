@@ -38,7 +38,7 @@ export const ChatView = ({ meetingId, meetingName, agentName }: Props) => {
 
   useEffect(() => {
     if (initialMessages) {
-      const normalized = initialMessages.map((msg) => ({
+      const normalized: Array<{ id: string; role: 'user' | 'assistant'; content: string; createdAt: Date }> = initialMessages.map((msg) => ({
         id: msg.id,
         role: msg.role === "assistant" ? "assistant" : "user",
         content: msg.content,
