@@ -133,7 +133,7 @@ export const ChannelMessages = ({ channelId }: Props) => {
                     currentUserName={session?.user?.name}
                     attachments={message.attachments ?? null}
                     attachmentTypes={(message.attachmentTypes ?? null) as ('image' | 'file' | 'voice')[] | null}
-                    createdAt={message.createdAt}
+                    createdAt={new Date(message.createdAt)}
                     showAvatar={showAvatar}
                     isGrouped={isGrouped}
                   />
