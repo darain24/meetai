@@ -35,14 +35,18 @@ const Page = async ({searchParams}: Props) => {
 
 
     return (
-        <Suspense fallback={<AgentsViewLoading/>}>
-            <AgentsListHeader />
-            <HydrationBoundary state={dehydrate(queryClient)}>
-                <ErrorBoundary fallback={<AgentsViewError />}>
-                    <AgentsView />
-                </ErrorBoundary>
-            </HydrationBoundary>
-        </Suspense>
+        <>
+            <Suspense fallback={<AgentsViewLoading/>}>
+                <AgentsListHeader />
+            </Suspense>
+            <Suspense fallback={<AgentsViewLoading/>}>
+                <HydrationBoundary state={dehydrate(queryClient)}>
+                    <ErrorBoundary fallback={<AgentsViewError />}>
+                        <AgentsView />
+                    </ErrorBoundary>
+                </HydrationBoundary>
+            </Suspense>
+        </>
     )
 }
 export default Page
