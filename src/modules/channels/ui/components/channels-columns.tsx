@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ChannelGetMany } from "../../types"
+import { Channel } from "../../types"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { EditIcon, MoreVerticalIcon, TrashIcon } from "lucide-react"
@@ -11,8 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-export type Channel = ChannelGetMany[number]
 
 interface ChannelsColumnsProps {
   onEdit: (channel: Channel) => void
