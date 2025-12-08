@@ -135,7 +135,7 @@ export const ChannelMessages = ({ channelId }: Props) => {
                     attachmentTypes={(message.attachmentTypes ?? null) as ('image' | 'file' | 'voice')[] | null}
                     createdAt={new Date(message.createdAt)}
                     showAvatar={showAvatar}
-                    isGrouped={isGrouped}
+                    isGrouped={!!isGrouped}
                   />
                 )
               })
