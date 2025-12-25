@@ -1,6 +1,10 @@
 # CollabSpace
 
-A modern, full-stack team collaboration platform featuring real-time video meetings with AI agents, team channels, personal notes, and AI-powered chat capabilities.
+Developed CollabSpace, a full-stack team collaboration platform enabling real-time video meetings with AI agents, team channel communication, personal note management, and AI-powered chat capabilities using Next.js, React, tRPC, PostgreSQL, and Daily.co, with secure multi-provider authentication (Google, GitHub, Email/Password) via Better Auth.
+
+Built scalable backend services supporting advanced features such as real-time messaging, video conferencing, AI agent management, search, filtering, sorting, and pagination, and deployed the system on Vercel with serverless architecture to ensure high availability and optimal performance.
+
+Designed a responsive, interactive UI with Tailwind CSS and Radix UI components, integrated dynamic real-time updates with TanStack Query, and implemented future-ready architecture for AI-driven meeting insights, agent automation, and enhanced collaboration features.
 
 ## 🚀 Features
 
