@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { createTRPCRouter } from '../init';
 import { channelsRouter } from '@/modules/channels/server/procedures';
 import { notesRouter } from '@/modules/notes/server/procedures';

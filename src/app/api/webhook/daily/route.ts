@@ -34,13 +34,15 @@ export async function POST(req: NextRequest) {
     
     // Verify webhook signature (optional but recommended)
     // Daily.co provides a signature header for verification
-    const signature = req.headers.get('x-daily-signature')
     // TODO: Implement signature verification if needed
+    // const signature = req.headers.get('x-daily-signature')
     
     const eventType = payload.type
     const roomName = payload.room || payload.room_name
     
-    console.log(`[DAILY WEBHOOK] Received event: ${eventType} for room: ${roomName}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[DAILY WEBHOOK] Received event: ${eventType} for room: ${roomName}`)
+    }
     
     // Handle participant joined event
     if (eventType === 'participant-joined') {
@@ -74,7 +76,9 @@ export async function POST(req: NextRequest) {
       // Check if the joined participant is the agent
       // If it's the agent, we don't need to do anything
       if (userId === existingMeeting.agent.id) {
-        console.log(`[DAILY WEBHOOK] Agent ${existingMeeting.agent.id} already joined`)
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[DAILY WEBHOOK] Agent ${existingMeeting.agent.id} already joined`)
+        }
         return NextResponse.json({ status: 'ok' })
       }
       
@@ -108,7 +112,9 @@ export async function POST(req: NextRequest) {
         timestamp: Date.now(),
       })
       
-      console.log(`[DAILY WEBHOOK] Agent join request stored for meeting ${meetingId}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[DAILY WEBHOOK] Agent join request stored for meeting ${meetingId}`)
+      }
       
       // Note: Daily.co doesn't support server-side joining directly
       // The agent will be joined by the client-side AgentJoiner component
@@ -118,7 +124,9 @@ export async function POST(req: NextRequest) {
     // Handle participant left event (optional cleanup)
     if (eventType === 'participant-left') {
       // You can add cleanup logic here if needed
-      console.log(`[DAILY WEBHOOK] Participant left room: ${roomName}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[DAILY WEBHOOK] Participant left room: ${roomName}`)
+      }
     }
     
     return NextResponse.json({ status: 'ok' })

@@ -5,3 +5,5 @@ ALTER TABLE messages
 ADD COLUMN IF NOT EXISTS attachments text[] DEFAULT '{}',
 ADD COLUMN IF NOT EXISTS attachment_types text[] DEFAULT '{}';
 
+
+

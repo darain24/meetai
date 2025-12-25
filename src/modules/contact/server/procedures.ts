@@ -76,7 +76,7 @@ User ID: ${ctx.auth.user.id}
             }
 
             return { success: true, messageId: data?.id };
-          } catch (importError) {
+          } catch {
             // Fall through to other methods
           }
         }
