@@ -11,8 +11,6 @@ import { redirect } from "next/navigation";
 import {loadSearchParams} from "@/modules/meetings/params"
 import type {SearchParams} from "nuqs/server"
 
-export const dynamic = 'force-dynamic'
-
 interface Props {
     searchParams: Promise<SearchParams>
 }
@@ -34,7 +32,9 @@ const page = async ({searchParams}: Props) => {
     })
     return (
         <>
-            <MeetingsListHeader />
+            <Suspense fallback={<MeetingsViewLoading/>}>
+                <MeetingsListHeader />
+            </Suspense>
             <HydrationBoundary state={dehydrate(queryClient)}>
                 <Suspense fallback={<MeetingsViewLoading/>}>
                     <ErrorBoundary fallback={<MeetingsViewError />}>

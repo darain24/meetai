@@ -10,8 +10,6 @@ import { redirect } from "next/navigation"
 import { SearchParams } from "nuqs/server"
 import { filterSearchParams } from "@/modules/agents/params"
 
-export const dynamic = 'force-dynamic'
-
 interface Props {
     searchParams: Promise<SearchParams>
 }

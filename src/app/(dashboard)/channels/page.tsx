@@ -1,9 +1,13 @@
 import { ChannelsView } from "@/modules/channels/ui/views/channels-view";
-
-export const dynamic = 'force-dynamic'
+import { Suspense } from "react";
+import { LoadingState } from "@/components/loading-state";
 
 export default function ChannelsPage() {
-  return <ChannelsView />;
+  return (
+    <Suspense fallback={<LoadingState title="Loading channels" description="Please wait..." />}>
+      <ChannelsView />
+    </Suspense>
+  );
 }
 
 

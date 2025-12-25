@@ -1,9 +1,13 @@
 import { NotesView } from "@/modules/notes/ui/views/notes-view";
-
-export const dynamic = 'force-dynamic'
+import { Suspense } from "react";
+import { LoadingState } from "@/components/loading-state";
 
 export default function NotesPage() {
-  return <NotesView />;
+  return (
+    <Suspense fallback={<LoadingState title="Loading notes" description="Please wait..." />}>
+      <NotesView />
+    </Suspense>
+  );
 }
 
 
